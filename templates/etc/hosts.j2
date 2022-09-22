@@ -1,0 +1,7 @@
+# Ansible managed file
+
+127.0.0.1       localhost
+{% if web_domaine %}
+127.0.1.1       {{ web_domaine }}
+{% endif %}
+{{ '%-15s' |format(ansible_default_ipv4.address) }} {{ ansible_fqdn }} {{ ansible_hostname }}

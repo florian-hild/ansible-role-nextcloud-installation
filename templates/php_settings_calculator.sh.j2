@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Source this file to set the varibales
+
+AvailableRAM=$(awk '/MemAvailable/ {printf "%d", $2/1024}' /proc/meminfo)
+AverageFPM=$(ps --no-headers -o 'rss,cmd' -C php-fpm8.1 | awk '{ sum+=$1 } END { printf ("%d\n", sum/NR/1024,"M") }')
+FPMS=$((AvailableRAM/AverageFPM))
+PMaxSS=$((FPMS*2/3))
+PMinSS=$((PMaxSS/2))
+PStartS=$(((PMaxSS+PMinSS)/2))
+
+echo $AvailableRAM
+echo $AverageFPM
+echo $FPMS
+echo $PMaxSS
+echo $PMinSS
+echo $PStartS
+

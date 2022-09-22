@@ -1,0 +1,64 @@
+---
+
+# ------------------------------------------------------------------------------
+# Author     : Florian Hild
+# Created    : 05-09-2022
+# Description: tasks file
+# ------------------------------------------------------------------------------
+
+- name: Install debian package list
+  tags: nextcloud-installation_install_pkgs
+  ansible.builtin.apt:
+    name: "{{ debian_package_list }}"
+    state: present
+    update_cache: true
+
+- name: Add nginx repo key
+  tags: nextcloud-installation_add_nginx_repo
+  ansible.builtin.apt_key:
+    url: "{{ nginx_repo_key }}"
+    state: present
+
+- name: Add nginx repo
+  tags: nextcloud-installation_add_nginx_repo
+  ansible.builtin.apt_repository:
+    repo: "deb {{ nginx_debian_repo_url }} {{ ansible_distribution_release }} nginx"
+    filename: nginx
+    state: present
+    update_cache: true
+
+- name: Add php repo key
+  tags: nextcloud-installation_add_php_repo
+  ansible.builtin.apt_key:
+    url: "{{ php_repo_key }}"
+    state: present
+
+- name: Add php repo
+  tags: nextcloud-installation_add_php_repo
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64] {{ php_debian_repo_url }} {{ ansible_distribution_release }} main"
+    filename: nginx
+    state: present
+    update_cache: true
+
+- name: Check if mariadb repo already exists
+  tags: nextcloud-installation_add_mariadb_repo
+  register: mariadb_repo
+  changed_when: mariadb_repo.rc != 0
+  failed_when: mariadb_repo.rc == "never"
+  ansible.builtin.command: "grep -i {{ mariadb_debian_repo_setup_version }} /etc/apt/sources.list.d/mariadb.list"
+
+- name: Download mariadb repo setup script
+  tags: nextcloud-installation_add_mariadb_repo
+  when: mariadb_repo.rc != 0
+  ansible.builtin.get_url:
+    url: "{{ mariadb_debian_repo_setup }}"
+    dest: /root/
+    mode: 0700
+
+- name: Run mariadb repo setup script
+  tags: nextcloud-installation_add_mariadb_repo
+  when: mariadb_repo.rc != 0
+  ansible.builtin.command: "/root/mariadb_repo_setup --mariadb-server-version=\"mariadb-{{ mariadb_debian_repo_setup_version }}\""
+
+...

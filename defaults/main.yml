@@ -1,0 +1,63 @@
+---
+
+# ------------------------------------------------------------------------------
+# Author     : Florian Hild
+# Created    : 01-09-2022
+# Description: defaults file
+# ------------------------------------------------------------------------------
+
+# pre_install
+web_domaine: null
+
+# bash-completion bzip2 dialog \
+# dirmngr ffmpeg ghostscript git gpg gnupg gnupg2 htop jq libfile-fcntllock-perl \
+# libfontconfig1 libfuse2 locate net-tools rsyslog screen smbclient \
+# socat software-properties-common tree zip
+
+debian_package_list:
+  - apt-transport-https
+  - ca-certificates
+  - cron
+  - curl
+  - gnupg2
+  - lsb-release
+  - ssl-cert
+  - unzip
+  - wget
+  - nfs-common
+  - cifs-utils
+  - debian-archive-keyring
+
+ubuntu_package_list:
+  - apt-transport-https
+  - ca-certificates
+  - cron
+  - curl
+  - gnupg2
+  - lsb-release
+  - ssl-cert
+  - unzip
+  - wget
+  - nfs-common
+  - cifs-utils
+  - ubuntu-keyring
+
+mariadb_repo_key: "https://mariadb.org/mariadb_release_signing_key.asc"
+mariadb_ubuntu_repo_url: "https://mirror.kumi.systems/mariadb/repo/10.8/ubuntu"
+mariadb_debian_repo_setup: "https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
+mariadb_debian_repo_setup_version: "10.8"
+mariadb_root_psw: "mar1adb"
+
+nginx_repo_key: "https://nginx.org/keys/nginx_signing.key"
+nginx_debian_repo_url: "http://nginx.org/packages/mainline/debian"
+
+php_repo_key: "https://packages.sury.org/php/apt.gpg"
+php_debian_repo_url: "https://packages.sury.org/php/"
+
+# install_nginx
+reverse_proxy_ip: null
+
+# install_php
+php_version: 8.1
+
+...

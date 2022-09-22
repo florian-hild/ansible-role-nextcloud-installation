@@ -1,0 +1,46 @@
+---
+
+# ------------------------------------------------------------------------------
+# Author     : Florian Hild
+# Created    : 05-09-2022
+# Description: tasks file
+# ------------------------------------------------------------------------------
+
+- name: Install ubuntu package list
+  tags: nextcloud-installation_install_pkgs
+  ansible.builtin.apt:
+    name: "{{ ubuntu_package_list }}"
+    state: present
+    update_cache: true
+
+- name: Add nginx repo via PPA
+  tags: nextcloud-installation_add_nginx_repo
+  notify: Remove nginx
+  ansible.builtin.apt_repository:
+    repo: 'ppa:nginx/stable'
+    state: present
+    update_cache: true
+
+- name: Add php repo via PPA
+  tags: nextcloud-installation_add_php_repo
+  # when: ansible_distribution_version == "20.04"
+  ansible.builtin.apt_repository:
+    repo: 'ppa:ondrej/php'
+    state: present
+    update_cache: true
+
+- name: Add mariadb repo key
+  tags: nextcloud-installation_add_mariadb_repo
+  ansible.builtin.apt_key:
+    url: "{{ mariadb_repo_key }}"
+    state: present
+
+- name: Add mariadb repo
+  tags: nextcloud-installation_add_mariadb_repo
+  ansible.builtin.apt_repository:
+    repo: "deb {{ mariadb_ubuntu_repo_url }} {{ ansible_distribution_release }} main"
+    filename: mariadb
+    state: present
+    update_cache: true
+
+...

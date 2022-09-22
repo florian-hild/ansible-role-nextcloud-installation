@@ -1,0 +1,28 @@
+---
+
+# ------------------------------------------------------------------------------
+# Author     : Florian Hild
+# Created    : 05-09-2022
+# Description: tasks file
+# ------------------------------------------------------------------------------
+
+- name: Block pre_install
+  tags: nextcloud-installation_pre_install
+  block:
+    - name: "Deploy hosts file"
+      tags: nextcloud-installation_setup_hosts
+      ansible.builtin.template:
+        src: "templates/etc/hosts.j2"
+        dest: "/etc/hosts"
+        owner: root
+        group: root
+        mode: 0644
+        backup: true
+
+    - ansible.builtin.import_tasks: pre_install_debian.yml
+      when: ansible_pkg_mgr == "apt" and ansible_distribution == "Debian"
+
+    - ansible.builtin.import_tasks: pre_install_ubuntu.yml
+      when: ansible_pkg_mgr == "apt" and ansible_distribution == "Ubuntu"
+
+...

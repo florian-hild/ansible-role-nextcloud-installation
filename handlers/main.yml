@@ -1,0 +1,14 @@
+---
+
+# ------------------------------------------------------------------------------
+# Author     : Florian Hild
+# Created    : 05-09-2022
+# Description: handlers file
+# ------------------------------------------------------------------------------
+
+- name: Remove nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: absent
+
+...

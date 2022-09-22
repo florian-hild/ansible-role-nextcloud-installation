@@ -1,0 +1,38 @@
+---
+
+# ------------------------------------------------------------------------------
+# Author     : Florian Hild
+# Created    : 05-09-2022
+# Description: tasks file
+# ------------------------------------------------------------------------------
+
+- name: Block install_nginx
+  tags: nextcloud-installation_install_nginx
+  block:
+    - name: Install nginx package
+      tags: nextcloud-installation_install_nginx_pkg
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+
+    - name: Deploy nginx config
+      tags: nextcloud-installation_deploy_nginx_config
+      ansible.builtin.template:
+        src: templates/etc/nginx/nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+        owner: root
+        group: root
+        mode: 0644
+        backup: true
+
+    - name: Enable and start nginx.service
+      tags:
+        - nextcloud-installation_start_nginx_service
+        - nextcloud-installation_enable_nginx_service
+      ansible.builtin.systemd:
+        name: nginx.service
+        state: started
+        enabled: true
+
+...

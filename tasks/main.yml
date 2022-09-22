@@ -1,0 +1,23 @@
+---
+
+# ------------------------------------------------------------------------------
+# Author     : Florian Hild
+# Created    : 01-09-2022
+# Description: tasks file
+# ------------------------------------------------------------------------------
+
+- name: Make sure os is supported
+  tags: always
+  when: not (ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu')
+  ansible.builtin.fail:
+    msg:
+      - "The os of this host is not supported by this role."
+      - "os: {{ ansible_distribution }}"
+
+- ansible.builtin.import_tasks: pre_install.yml
+- ansible.builtin.import_tasks: install_nginx.yml
+- ansible.builtin.import_tasks: install_php.yml
+- ansible.builtin.import_tasks: install_mariadb.yml
+# - ansible.builtin.import_tasks: pre_install.yml
+
+...

@@ -1,0 +1,98 @@
+---
+
+# ------------------------------------------------------------------------------
+# Author     : Florian Hild
+# Created    : 05-09-2022
+# Description: tasks file
+# ------------------------------------------------------------------------------
+
+- name: Block install_php
+  tags: nextcloud-installation_install_php
+  block:
+    - name: Install php packages
+      tags: nextcloud-installation_install_php_pkgs
+      ansible.builtin.apt:
+        name:
+          - "php-common"
+          - "php{{ php_version }}-fpm"
+          - "php{{ php_version }}-gd"
+          - "php{{ php_version }}-curl"
+          - "php{{ php_version }}-xml"
+          - "php{{ php_version }}-zip"
+          - "php{{ php_version }}-intl"
+          - "php{{ php_version }}-mbstring"
+          - "php{{ php_version }}-bz2"
+          # - "php{{ php_version }}-ldap"
+          - "php{{ php_version }}-apcu"
+          - "php{{ php_version }}-bcmath"
+          - "php{{ php_version }}-gmp"
+          - "php{{ php_version }}-imagick"
+          - "php{{ php_version }}-igbinary"
+          - "php{{ php_version }}-mysql"
+          - "php{{ php_version }}-redis"
+          - "php{{ php_version }}-smbclient"
+          - "php{{ php_version }}-cli"
+          - "php{{ php_version }}-common"
+          - "php{{ php_version }}-opcache"
+          - "php{{ php_version }}-readline"
+          - "imagemagick"
+        state: present
+        update_cache: true
+
+    - name: "Deploy php-fpm.conf"
+      tags: nextcloud-installation_php-fpm_conf
+      ansible.builtin.template:
+        src: "templates/etc/php/{{ (php_version | string).split('.')[0] }}.x/fpm/php-fpm.conf.j2"
+        dest: "/etc/php/{{ php_version }}/fpm/php-fpm.conf"
+        owner: root
+        group: root
+        mode: 0644
+        backup: true
+
+    - name: "Deploy php.ini for fpm"
+      tags: nextcloud-installation_php_ini
+      ansible.builtin.template:
+        src: "templates/etc/php/{{ (php_version | string).split('.')[0] }}.x/fpm/php.ini.j2"
+        dest: "/etc/php/{{ php_version }}/fpm/php.ini"
+        owner: root
+        group: root
+        mode: 0644
+        backup: true
+
+    - name: "Deploy php.ini for cli"
+      tags: nextcloud-installation_php_ini_cli
+      ansible.builtin.template:
+        src: "templates/etc/php/{{ (php_version | string).split('.')[0] }}.x/cli/php.ini.j2"
+        dest: "/etc/php/{{ php_version }}/cli/php.ini"
+        owner: root
+        group: root
+        mode: 0644
+        backup: true
+
+    - name: "Deploy apcu.ini"
+      tags: nextcloud-installation_php_apcu_ini
+      ansible.builtin.template:
+        src: "templates/etc/php/{{ (php_version | string).split('.')[0] }}.x/mods-available/apcu.ini.j2"
+        dest: "/etc/php/{{ php_version }}/mods-available/apcu.ini"
+        owner: root
+        group: root
+        mode: 0644
+        backup: true
+
+    - name: "Deploy ImageMagick-6/policy.xml"
+      tags: nextcloud-installation_php_imagemagick_policy
+      ansible.builtin.template:
+        src: "templates/etc/ImageMagick-6/policy.xml.j2"
+        dest: "/etc/ImageMagick-6/policy.xml"
+        owner: root
+        group: root
+        mode: 0644
+        backup: true
+
+    - name: "Enable php{{ php_version }}-fpm.service"
+      tags: nextcloud-installation_enable_php_service
+      ansible.builtin.systemd:
+        name: "php{{ php_version }}-fpm.service"
+        enabled: true
+
+...

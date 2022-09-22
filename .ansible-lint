@@ -3,5 +3,6 @@
 skip_list:
   - no-changed-when
   - experimental
+  - role-name
 
 ...
