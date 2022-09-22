@@ -1,0 +1,50 @@
+---
+
+# ------------------------------------------------------------------------------
+# Author     : Florian Hild
+# Created    : 05-09-2022
+# Description: tasks file
+# ------------------------------------------------------------------------------
+
+- name: Block install_mariadb
+  tags: nextcloud-installation_install_mariadb
+  block:
+    - name: Block install_php
+      tags: nextcloud-installation_install_php
+      block:
+        - name: Install mariadb package
+          tags: nextcloud-installation_install_mariadb_pkg
+          ansible.builtin.apt:
+            name: mariadb-server
+            state: present
+            update_cache: true
+
+        - name: Check if security settings already enabled
+          tags: nextcloud-installation_mariadb_secure_installation
+          ignore_errors: true
+          changed_when: cmd_out.rc == 0
+          # Task is OK if rc = 1
+          failed_when: cmd_out.rc == ""
+          register: cmd_out
+          ansible.builtin.shell:
+            cmd: 'echo "exit"|mysql -h 127.0.0.1 -u root'
+
+        # Problem if the order or count of questions are changing!
+        - name: Setup MariaDB Security Settings
+          tags: nextcloud-installation_mariadb_secure_installation
+          when: cmd_out.rc == 0
+          ansible.builtin.shell:
+            cmd: 'echo -e "\nn\n\n{{ mariadb_root_psw }}\n{{ mariadb_root_psw }}\n\n\n\n\n\n"| mysql_secure_installation'
+
+        - name: Deploy my.cnf for mariadb
+          tags: nextcloud-installation_mariadb_my_cnf
+          notify: Restart mysql.service
+          ansible.builtin.template:
+            src: templates/etc/mysql/my.cnf.j2
+            dest: /etc/mysql/my.cnf
+            owner: root
+            group: root
+            mode: 0644
+            backup: true
+
+...

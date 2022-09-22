@@ -11,4 +11,9 @@
     name: nginx
     state: absent
 
+- name: Restart mysql.service
+  ansible.builtin.systemd:
+    name: mysql.service
+    state: restarted
+
 ...
