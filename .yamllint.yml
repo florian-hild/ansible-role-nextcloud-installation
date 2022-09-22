@@ -31,3 +31,5 @@ rules:
   trailing-spaces: enable
   truthy:
     level: warning
+
+...

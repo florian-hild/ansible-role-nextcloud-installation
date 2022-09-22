@@ -1,4 +1,7 @@
 ---
+
 skip_list:
-  - package-latest
   - no-changed-when
+  - experimental
+
+...
