@@ -1,0 +1,78 @@
+---
+
+# ------------------------------------------------------------------------------
+# Author     : Florian Hild
+# Created    : 27-09-2022
+# Description: tasks file
+# ------------------------------------------------------------------------------
+
+- name: Block install_redis
+  tags: nextcloud-installation_install_redis
+  block:
+    - name: Install redis package
+      tags: nextcloud-installation_install_redis_pkg
+      ansible.builtin.apt:
+        name: redis-server
+        state: present
+        update_cache: true
+
+    - name: Deploy redis config
+      tags: nextcloud-installation_deploy_redis_config
+      ansible.builtin.template:
+        src: templates/etc/redis/redis.conf.j2
+        dest: /etc/redis/redis.conf
+        owner: redis
+        group: redis
+        mode: 0640
+        backup: true
+
+    - name: Adding user www-data to redis group
+      tags: nextcloud-installation_add_redis_group
+      ansible.builtin.user:
+        name: www-data
+        groups: redis
+        append: true
+
+    - name: Deploy sysctl config
+      tags: nextcloud-installation_deploy_sysctl_config
+      # Containers are using the kernel parameters of the host system
+      when: '"container" not in ansible_virtualization_tech_guest'
+      register: sysctl_config
+      ansible.builtin.template:
+        src: templates/etc/sysctl.d/97-nextcloud-sysctl.conf.j2
+        dest: /etc/sysctl.d/97-nextcloud-sysctl.conf
+        owner: root
+        group: root
+        mode: 0644
+        backup: true
+        validate: sysctl --load=%s
+
+    - name: Enable and start redis.service
+      tags:
+        - nextcloud-installation_start_redis_service
+        - nextcloud-installation_enable_redis_service
+      ansible.builtin.systemd:
+        name: redis.service
+        state: started
+        enabled: true
+
+    - name: Confirm reboot
+      tags: nextcloud-installation_deploy_sysctl_config
+      when: sysctl_config.changed
+      register: confirm_reboot
+      ansible.builtin.pause:
+        prompt: Are you sure you want to reboot? (yes/no)
+
+    - name: Trigger handler for reboot
+      tags: nextcloud-installation_deploy_sysctl_config
+      when: sysctl_config.changed and confirm_reboot.user_input | bool
+      notify: Reboot host and wait for it to restart
+      changed_when: true
+      ansible.builtin.debug:
+        msg: Trigger handler to reboot system
+
+    - name: Flush Handlers
+      tags: nextcloud-installation_deploy_sysctl_config
+      ansible.builtin.meta: flush_handlers
+
+...
